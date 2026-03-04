@@ -39,17 +39,20 @@ async function register(req, res) {
       type: newUser.type,
     });
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ 
+      message: "Server error",
+      error: error.message,
+    });
   }
 }
 
 // -------- Controller to handle user login --------
 async function login(req, res) {
-  const { email, username, passowrd } = req.body;
+  const { email, username, password } = req.body;
   if (!email && !username) {
     return res.status(400).json({ message: "Email or username is required" });
   }
-  if (!passowrd) {
+  if (!password) {
     return res.status(400).json({ message: "Password is required" });
   }
   try {
@@ -59,7 +62,7 @@ async function login(req, res) {
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
-    const isMatch = await bcrypt.compare(passowrd, user.password);
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
