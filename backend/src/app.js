@@ -14,6 +14,10 @@ app.use(express.json())
 app.use(cookieParser())
 
 // Enable CORS for the frontend
+app.use(cors({
+  origin: 'http://localhost:5173', // Vite's default port
+  credentials: true
+}));
 
 
 

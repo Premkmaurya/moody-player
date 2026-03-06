@@ -1,8 +1,8 @@
-const express=require("express");
-const authController=require("../controllers/auth.controller");
-const authMiddleware=require("../middlewares/auth.middleware");
+const express = require("express");
+const authController = require("../controllers/auth.controller");
+const authMiddleware = require("../middlewares/auth.middleware");
 
-const router=express.Router();
+const router = express.Router();
 
 // Register a new user
 router.post("/register", authController.register);
@@ -16,4 +16,4 @@ router.post("/logout", authController.logout);
 // Get current user profile
 router.get("/profile", authMiddleware, authController.getCurrentUser);
 
-module.exports=router;
+module.exports = router;
