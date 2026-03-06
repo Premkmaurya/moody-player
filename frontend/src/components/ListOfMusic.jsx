@@ -1,5 +1,6 @@
-import React,{useState} from "react";
+import React, { useState } from "react";
 import { Music2 } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 const ListOfMusic = () => {
   const playlist = [
@@ -9,7 +10,7 @@ const ListOfMusic = () => {
     { id: 4, active: false },
     { id: 5, active: false },
   ];
-    const [isPlaying, setIsPlaying] = useState(false);
+  const { isPlaying } = useAuth();
   return (
     <div className="lg:col-span-1 bg-zinc-900 border border-zinc-800/80 rounded-[2rem] p-6 shadow-xl flex flex-col h-full">
       <div className="flex items-center gap-2 mb-6 px-2">

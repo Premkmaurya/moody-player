@@ -4,7 +4,6 @@ import ListOfMusic from "../components/ListOfMusic";
 import Player from "../components/Player";
 
 const Home = () => {
-  // Dummy playlist data based on your wireframe
 
   return (
     <div className="min-h-screen bg-zinc-950 p-4 md:p-8 flex items-center justify-center font-sans text-zinc-100">

@@ -6,9 +6,10 @@ import {
   SkipBack,
   Disc3,
 } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 const Player = () => {
-      const [isPlaying, setIsPlaying] = useState(false);
+  const {isPlaying, setIsPlaying} = useAuth();
   return (
     <div className="bg-zinc-900 border border-zinc-800/80 rounded-[2rem] p-6 md:p-8 flex flex-col md:flex-row items-center gap-8 shadow-xl">
       {/* Left: Big Image Circle */}
