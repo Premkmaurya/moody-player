@@ -52,7 +52,7 @@ const EmotionDetector = () => {
 
   return (
     <>
-      <div className="relative bg-zinc-900 border border-zinc-800/80 rounded-[2rem] p-6 min-h-[350px] flex flex-col items-center justify-center overflow-hidden shadow-xl">
+      <div className="relative bg-zinc-900 border border-zinc-800/80 rounded-4xl p-6 min-h-[350px] flex flex-col items-center justify-center overflow-hidden shadow-xl">
         <video ref={videoRef} autoPlay muted width="400" height="300" />
         {/* Detect Button (Positioned bottom right just like the sketch) */}
         <button

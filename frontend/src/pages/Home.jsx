@@ -1,12 +1,9 @@
 import React from "react";
 import EmotionDetector from "../components/EmotionDetector";
-import ListOfMusic from "../components/ListOfMusic"
-import Player from "../components/Player"
+import ListOfMusic from "../components/ListOfMusic";
+import Player from "../components/Player";
 
 const Home = () => {
-
-
-
   // Dummy playlist data based on your wireframe
 
   return (
@@ -18,9 +15,9 @@ const Home = () => {
           <EmotionDetector />
 
           {/* BOTTOM LEFT: Player Area */}
-          <ListOfMusic />
+          <Player />
         </div>
-        <Player />
+        <ListOfMusic />
       </div>
     </div>
   );
