@@ -17,7 +17,9 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [songs, setSongs] = useState([]);
 
+  // For navigation after login/logout
   const navigate = useNavigate();
 
   // Check if user is authenticated on app load
@@ -128,6 +130,8 @@ export const AuthProvider = ({ children }) => {
     clearError,
     isPlaying,
     setIsPlaying,
+    songs,
+    setSongs,
     isAuthenticated: !!user,
   };
 
