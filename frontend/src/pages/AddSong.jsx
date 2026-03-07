@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   Music,
@@ -9,10 +9,15 @@ import {
   Sparkles,
   CheckCircle2,
 } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 export default function AddSong() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const imageRef = useRef(null);
+  const songRef = useRef(null);
+
+  const { addSong } = useAuth();
 
   const { register, handleSubmit, setValue, watch, reset } = useForm({
     defaultValues: {
@@ -56,26 +61,33 @@ export default function AddSong() {
     setValue("category", categoryId, { shouldValidate: true });
   };
 
+  const handleImageButtonClick = () => {
+    imageRef.current?.click();
+  };
+  const handleSongButtonClick = () => {
+    songRef.current?.click();
+  };
+
   const onSubmit = (data) => {
     setIsSubmitting(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Song Data Submitted:", data);
-      setIsSubmitting(false);
-      setSuccess(true);
-
-      // Reset form after 3 seconds
-      setTimeout(() => {
-        setSuccess(false);
+    // Simulate API call delay
+    addSong(data)
+      .then(() => {
+        setSuccess(true);
         reset();
-      }, 3000);
-    }, 1500);
+      })
+      .catch(() => {
+        setSuccess(false);
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+      });
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 md:p-8 font-sans text-slate-900">
-      <div className="w-full max-w-3xl bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
+    <div className="min-h-screen bg-[#08080a] flex items-center justify-center p-4 md:p-8 font-sans text-slate-900">
+      <div className="w-full max-w-3xl bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 overflow-hidden">
         {/* Header Section */}
         <div className="bg-[#0A1931] p-8 text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 opacity-10 transform translate-x-1/4 -translate-y-1/4">
@@ -167,10 +179,26 @@ export default function AddSong() {
                 <ImageIcon size={16} className="text-slate-400" /> Cover Image
                 URL
               </label>
+              <div>
+                <button
+                  type="button"
+                  onClick={handleImageButtonClick}
+                  className="mb-2 px-4 py-2 cursor-pointer rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-600 hover:bg-slate-100 transition-all flex items-center gap-2"
+                >
+                  <ImageIcon size={16} />
+                  select your image
+                </button>
+              </div>
               <input
-                type="url"
-                {...register("coverImage", { required: true })}
-                placeholder="https://example.com/image.jpg"
+                type="file"
+                ref={imageRef}
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={(e) => {
+                  setValue("coverImage", e.target.files[0], {
+                    shouldValidate: true,
+                  });
+                }}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0A1931]/20 focus:border-[#0A1931] transition-all"
               />
             </div>
@@ -180,11 +208,25 @@ export default function AddSong() {
               <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                 <Link2 size={16} className="text-slate-400" /> Song Audio URL
               </label>
+              <div>
+                <button
+                  type="button"
+                  onClick={handleSongButtonClick}
+                  className="mb-2 px-4 py-2 cursor-pointer rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-600 hover:bg-slate-100 transition-all flex items-center gap-2"
+                >
+                  <Link2 size={16} />
+                  select your Song
+                </button>
+              </div>
               <input
-                type="url"
-                {...register("songUrl", { required: true })}
-                placeholder="https://example.com/audio.mp3"
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0A1931]/20 focus:border-[#0A1931] transition-all"
+                type="file"
+                ref={songRef}
+                accept="audio/*"
+                style={{ display: "none" }}
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  setValue("songUrl", file, { shouldValidate: true });
+                }}
               />
             </div>
           </div>

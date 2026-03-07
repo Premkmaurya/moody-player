@@ -120,6 +120,21 @@ export const AuthProvider = ({ children }) => {
     setError(null);
   };
 
+  const addSong = async (songData) => {
+    try {
+      await axios.post(
+        "http://localhost:3000/api/songs",
+        songData,
+        {
+          withCredentials: true, // Include cookies for authentication
+        },
+      );
+      return { success: true };
+    } catch (error) {
+        return { success: false, error: "Failed to add song" };
+    }
+  }
+
   const value = {
     user,
     loading,
@@ -132,6 +147,7 @@ export const AuthProvider = ({ children }) => {
     setIsPlaying,
     songs,
     setSongs,
+    addSong,
     isAuthenticated: !!user,
   };
 
