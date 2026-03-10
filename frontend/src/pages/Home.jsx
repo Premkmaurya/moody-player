@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import EmotionDetector from "../components/EmotionDetector";
 import ListOfMusic from "../components/ListOfMusic";
 import Player from "../components/Player";
+import { useAuth } from "../context/AuthContext";
 
 const Home = () => {
+
 
   return (
     <div className="min-h-screen bg-zinc-950 p-4 md:p-8 flex items-center justify-center font-sans text-zinc-100">

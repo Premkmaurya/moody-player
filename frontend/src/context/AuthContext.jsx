@@ -25,6 +25,7 @@ export const AuthProvider = ({ children }) => {
   // Check if user is authenticated on app load
   useEffect(() => {
     checkAuthStatus();
+    fetchSong("sad");
   }, []);
 
   const checkAuthStatus = async () => {
@@ -122,18 +123,26 @@ export const AuthProvider = ({ children }) => {
 
   const addSong = async (songData) => {
     try {
-      await axios.post(
-        "http://localhost:3000/api/songs/add",
-        songData,
-        {
-          withCredentials: true, // Include cookies for authentication
-        },
-      );
+      await axios.post("http://localhost:3000/api/songs/add", songData, {
+        withCredentials: true, // Include cookies for authentication
+      });
       return { success: true };
     } catch (error) {
-        return { success: false, error: "Failed to add song" };
+      return { success: false, error: "Failed to add song" };
     }
-  }
+  };
+
+  const fetchSong = async (mood) => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/songs/get", {
+        withCredentials: true,
+      });
+      console.log(response.data);
+      setSongs(response.data);
+    } catch (error) {
+      return console.log(error);
+    }
+  };
 
   const value = {
     user,
@@ -148,6 +157,7 @@ export const AuthProvider = ({ children }) => {
     songs,
     setSongs,
     addSong,
+    fetchSong,
     isAuthenticated: !!user,
   };
 

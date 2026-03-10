@@ -116,6 +116,8 @@ export default function AddSong() {
     addSong(formData)
       .then(() => {
         setSuccess(true);
+        setImagePreviewUrl(null);
+        setSongPreviewUrl(null);
         reset();
       })
       .catch(() => {
