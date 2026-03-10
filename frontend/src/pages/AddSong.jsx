@@ -70,9 +70,16 @@ export default function AddSong() {
 
   const onSubmit = (data) => {
     setIsSubmitting(true);
+    const formData = new FormData();
+    formData.append("title", data.title);
+    formData.append("artist", data.artist);
+    formData.append("category", data.category);
+    formData.append("lyrics", data.lyrics);
+    formData.append("coverImage", data.coverImage);
+    formData.append("song", data.songUrl);
 
     // Simulate API call delay
-    addSong(data)
+    addSong(formData)
       .then(() => {
         setSuccess(true);
         reset();

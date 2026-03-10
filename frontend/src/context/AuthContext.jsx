@@ -123,7 +123,7 @@ export const AuthProvider = ({ children }) => {
   const addSong = async (songData) => {
     try {
       await axios.post(
-        "http://localhost:3000/api/songs",
+        "http://localhost:3000/api/songs/add",
         songData,
         {
           withCredentials: true, // Include cookies for authentication
