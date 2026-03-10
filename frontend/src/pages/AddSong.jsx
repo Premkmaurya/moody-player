@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   Music,
@@ -16,6 +16,40 @@ export default function AddSong() {
   const [success, setSuccess] = useState(false);
   const imageRef = useRef(null);
   const songRef = useRef(null);
+
+  const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
+  useEffect(() => {
+    return () => {
+      if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+    };
+  }, [imagePreviewUrl]);
+  const handleClearImage = () => {
+    setValue("coverImage", null, { shouldValidate: true }); // RHF field clear
+    if (imagePreviewUrl) {
+      URL.revokeObjectURL(imagePreviewUrl);
+    }
+    setImagePreviewUrl(null);
+    if (imageRef.current) {
+      imageRef.current.value = ""; // clear actual <input type="file">
+    }
+  };
+
+  const [songPreviewUrl, setSongPreviewUrl] = useState(null);
+  useEffect(() => {
+    return () => {
+      if (songPreviewUrl) URL.revokeObjectURL(songPreviewUrl);
+    };
+  }, [songPreviewUrl]);
+  const handleClearSong = () => {
+    setValue("songUrl", null, { shouldValidate: true }); // RHF field clear
+    if (songPreviewUrl) {
+      URL.revokeObjectURL(songPreviewUrl);
+    }
+    setSongPreviewUrl(null);
+    if (songRef.current) {
+      songRef.current.value = ""; // clear actual <input type="file">
+    }
+  };
 
   const { addSong } = useAuth();
 
@@ -196,6 +230,22 @@ export default function AddSong() {
                   select your image
                 </button>
               </div>
+              {imagePreviewUrl && (
+                <div className="relative mt-2">
+                  <img
+                    src={imagePreviewUrl}
+                    alt="Cover preview"
+                    className="h-32 w-full max-w-xs rounded-lg object-cover border border-slate-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleClearImage}
+                    className="absolute -top-3 -right-2 px-3 py-1 text-xs rounded-lg border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 transition-all"
+                  >
+                    X
+                  </button>
+                </div>
+              )}
               <input
                 type="file"
                 ref={imageRef}
@@ -204,6 +254,12 @@ export default function AddSong() {
                 onChange={(e) => {
                   setValue("coverImage", e.target.files[0], {
                     shouldValidate: true,
+                  });
+                  const file = e.target.files[0];
+                  const url = URL.createObjectURL(file);
+                  setImagePreviewUrl((old) => {
+                    if (old) URL.revokeObjectURL(old);
+                    return url;
                   });
                 }}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0A1931]/20 focus:border-[#0A1931] transition-all"
@@ -225,6 +281,21 @@ export default function AddSong() {
                   select your Song
                 </button>
               </div>
+              {songPreviewUrl && (
+                <div className="mt-2 flex items-center gap-3">
+                  <audio controls src={songPreviewUrl} className="flex-1">
+                    Your browser does not support the audio element.
+                  </audio>
+
+                  <button
+                    type="button"
+                    onClick={handleClearSong}
+                    className="px-3 py-1 text-xs rounded-lg border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 transition-all"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
               <input
                 type="file"
                 ref={songRef}
@@ -233,6 +304,11 @@ export default function AddSong() {
                 onChange={(e) => {
                   const file = e.target.files[0];
                   setValue("songUrl", file, { shouldValidate: true });
+                  const url = URL.createObjectURL(file);
+                  setSongPreviewUrl((old) => {
+                    if (old) URL.revokeObjectURL(old);
+                    return url;
+                  });
                 }}
               />
             </div>
