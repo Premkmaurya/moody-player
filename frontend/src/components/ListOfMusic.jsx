@@ -1,11 +1,25 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Music2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 const ListOfMusic = () => {
-  const { isPlaying, songs } = useAuth();
+  const { setPlayersSong, songs, setSongs } = useAuth();
 
+  useEffect(() => {
+    if (songs.length > 0 && !songs.some((song) => song.active)) {
+      handleActive(0);
+      setPlayersSong(songs[0]);
+    }
+  }, [songs]);
 
+  const handleActive = (clickedIndex) => {
+    const updatedSongs = songs.map((song, index) => ({
+      ...song,
+      active: index === clickedIndex,
+    }));
+    setSongs(updatedSongs);
+    setPlayersSong(songs[clickedIndex]);
+  };
 
   return (
     <div className="lg:col-span-1 bg-zinc-900 border border-zinc-800/80 rounded-[2rem] p-6 shadow-xl flex flex-col h-full">
@@ -18,30 +32,34 @@ const ListOfMusic = () => {
         {songs.map((item, index) => (
           <div
             key={index}
+            onClick={() => {
+              handleActive(index);
+            }}
             className={`flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all duration-200 group
-                  ${
-                    item.active
-                      ? "bg-zinc-800 border border-zinc-700 shadow-lg"
-                      : "bg-transparent border border-transparent hover:bg-zinc-800/50"
-                  }`}
+              ${
+                item.active
+                  ? "bg-zinc-800 border border-zinc-700 shadow-lg"
+                  : "bg-transparent border border-transparent hover:bg-zinc-800/50"
+              }`}
           >
             {/* Avatar Circle */}
             <div
-              className={`w-12 h-12 rounded-full shrink-0 flex items-center justify-center transition-colors
-                  ${item.active ? "bg-indigo-500" : "bg-zinc-800 group-hover:bg-zinc-700"}
-                `}
+              className={`w-12 h-12 rounded-full shrink-0 flex items-center justify-center
+              ${item.active ? "bg-indigo-500" : "bg-zinc-800 group-hover:bg-zinc-700"}`}
             >
-              <img src={item.coverImage} alt={item.title} className="w-full h-full object-cover rounded-full" />
+              <img
+                src={item.coverImage}
+                alt={item.title}
+                className="w-full h-full object-cover rounded-full"
+              />
             </div>
 
             {/* Text Bars */}
             <div className="flex flex-col w-full">
-              <div
-                className={`w-full font-bold text-lg tracking-tighter`}
-              >{item.title} </div>
-              <div
-                className={`w-full tracking-tighter`}
-              >{item.artist} </div>
+              <div className={`w-full font-semibold text-lg tracking-tighter`}>
+                {item.title}
+              </div>
+              <div className={`w-full tracking-tighter`}>{item.artist}</div>
             </div>
           </div>
         ))}

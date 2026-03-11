@@ -16,6 +16,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [playersSong, setPlayersSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [songs, setSongs] = useState([]);
 
@@ -137,7 +138,6 @@ export const AuthProvider = ({ children }) => {
       const response = await axios.get("http://localhost:3000/api/songs/get", {
         withCredentials: true,
       });
-      console.log(response.data);
       setSongs(response.data);
     } catch (error) {
       return console.log(error);
@@ -154,6 +154,8 @@ export const AuthProvider = ({ children }) => {
     clearError,
     isPlaying,
     setIsPlaying,
+    playersSong,
+    setPlayersSong,
     songs,
     setSongs,
     addSong,

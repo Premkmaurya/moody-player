@@ -8,7 +8,7 @@ const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Get all songs
-router.get("/get", authMiddleware, songController.getSongs);
+router.get("/get", songController.getSongs);
 
 // Add a new song
 router.post(
