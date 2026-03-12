@@ -17,25 +17,14 @@ const Player = () => {
     }
   }, [isPlaying, playersSong]);
 
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (isPlaying) {
-      audio.play().catch(() => {});
-    } else {
-      audio.pause();
-    }
-  }, [isPlaying, playersSong]);
-
   return (
-    <div className="bg-zinc-900 border border-zinc-800/80 rounded-[2rem] p-6 md:p-8 flex flex-col md:flex-row items-center gap-8 shadow-xl">
+    <div className="bg-zinc-900 border border-zinc-800/80 rounded-4xl p-6 md:p-8 flex flex-col md:flex-row items-center gap-8 shadow-xl">
       {/* Left: Big Image Circle */}
       <div className="relative shrink-0">
         <div
-          className={`w-32 h-32 md:w-40 md:h-40 rounded-full bg-zinc-950 border-4 border-zinc-800 shadow-2xl flex items-center justify-center overflow-hidden transition-all duration-[10s] ease-linear ${isPlaying ? "animate-[spin_10s_linear_infinite]" : ""}`}
+          className={`w-32 h-32 md:w-40 md:h-40 rounded-full bg-zinc-950 border-4 border-zinc-800 shadow-2xl flex items-center justify-center overflow-hidden transition-all duration-[10s] ease-linear animate-[spin_10s_linear_infinite] will-change-transform ${!isPlaying ? "[animation-play-state:paused]" : ""}`}
         >
-          <div className="absolute inset-0">
+          <div className="absolute inset-0 rounded-full overflow-hidden">
             <img
               src={playersSong?.coverImage}
               alt={playersSong?.title}
@@ -50,7 +39,7 @@ const Player = () => {
       {/* Right: Info and Controls (Stacked vertically) */}
       <div className="flex flex-col items-center justify-center flex-1 gap-8 w-full">
         {/* Fake Text Bars (Equalizer/Track Info) */}
-        <div className="flex flex-col items-center gap-3 w-full max-w-[200px]">
+        <div className="flex flex-col items-center gap-3 w-full max-w-50">
           <div className="w-full h-4 bg-zinc-700 rounded-full"></div>
           <div className="w-[80%] h-3 bg-zinc-800 rounded-full"></div>
           <div className="w-[60%] h-2 bg-zinc-800/50 rounded-full"></div>
