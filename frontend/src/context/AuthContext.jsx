@@ -19,6 +19,7 @@ export const AuthProvider = ({ children }) => {
   const [playersSong, setPlayersSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [songs, setSongs] = useState([]);
+  const [mood, setMood] = useState(null);
 
   // For navigation after login/logout
   const navigate = useNavigate();
@@ -135,13 +136,44 @@ export const AuthProvider = ({ children }) => {
 
   const fetchSong = async (mood) => {
     try {
-      const response = await axios.get("http://localhost:3000/api/songs/get", {
-        withCredentials: true,
-      });
+      const response = await axios.get(
+        "http://localhost:3000/api/songs/get",
+        mood,
+        {
+          withCredentials: true, // Include cookies for authentication
+        },
+      );
       setSongs(response.data);
     } catch (error) {
       return console.log(error);
     }
+  };
+
+  const skipSong = (direction) => {
+    if (songs.length === 0) return;
+
+    // 1. Find current index
+    const currentIndex = songs.findIndex((s) => s._id === playersSong?._id);
+
+    // 2. Calculate next index (with wrap-around logic)
+    let nextIndex;
+    if (direction === "forward") {
+      nextIndex = (currentIndex + 1) % songs.length;
+    } else {
+      nextIndex = (currentIndex - 1 + songs.length) % songs.length;
+    }
+
+    const nextSong = songs[nextIndex];
+
+    // 3. Update active state in the list (for UI consistency)
+    const updatedSongs = songs.map((song, index) => ({
+      ...song,
+      active: index === nextIndex,
+    }));
+
+    setSongs(updatedSongs);
+    setPlayersSong(nextSong);
+    setIsPlaying(true); // Auto-play the next song
   };
 
   const value = {
@@ -160,6 +192,9 @@ export const AuthProvider = ({ children }) => {
     setSongs,
     addSong,
     fetchSong,
+    skipSong,
+    mood,
+    setMood,
     isAuthenticated: !!user,
   };
 

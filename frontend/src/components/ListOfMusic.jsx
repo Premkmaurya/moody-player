@@ -3,7 +3,7 @@ import { Music2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 const ListOfMusic = () => {
-  const { setPlayersSong, songs, setSongs } = useAuth();
+  const { setPlayersSong, setIsPlaying, songs, setSongs } = useAuth();
 
   useEffect(() => {
     if (songs.length > 0 && !songs.some((song) => song.active)) {
@@ -34,6 +34,7 @@ const ListOfMusic = () => {
             key={index}
             onClick={() => {
               handleActive(index);
+              setIsPlaying(true);
             }}
             className={`flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all duration-200 group
               ${

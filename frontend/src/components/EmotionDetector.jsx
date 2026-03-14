@@ -3,11 +3,13 @@ import * as faceapi from "face-api.js";
 
 import { Loader2, ScanFace } from "lucide-react";
 
+import { useAuth } from "../context/AuthContext";
+
 const EmotionDetector = () => {
   const videoRef = useRef();
+  const { setMood } = useAuth();
 
   const [isDetecting, setIsDetecting] = useState(false);
-  const [mood, setMood] = useState(null);
 
   useEffect(() => {
     startVideo();
@@ -53,7 +55,12 @@ const EmotionDetector = () => {
   return (
     <>
       <div className="relative bg-zinc-900 border border-zinc-800/80 rounded-4xl min-h-[250px] flex flex-col items-center justify-center overflow-hidden shadow-xl">
-        <video ref={videoRef} className="w-full h-[50vh] object-cover" autoPlay muted />
+        <video
+          ref={videoRef}
+          className="w-full h-[50vh] object-cover"
+          autoPlay
+          muted
+        />
         {/* Detect Button (Positioned bottom right just like the sketch) */}
         <button
           onClick={detectEmotion}

@@ -4,7 +4,10 @@ import { useAuth } from "../context/AuthContext";
 
 const Player = () => {
   const audioRef = useRef(null);
-  const { isPlaying, setIsPlaying, playersSong } = useAuth();
+  const { isPlaying, setIsPlaying, playersSong, skipSong } = useAuth();
+  // Inside Player component
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -16,6 +19,28 @@ const Player = () => {
       audio.pause();
     }
   }, [isPlaying, playersSong]);
+
+  const handleTimeUpdate = () => {
+    setCurrentTime(audioRef.current.currentTime);
+  };
+
+  const handleLoadedMetadata = () => {
+    setDuration(audioRef.current.duration);
+  };
+
+  // Handler for when the user moves the slider
+  const handleSliderChange = (e) => {
+    const newTime = Number(e.target.value);
+    audioRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
+  };
+
+  const formatTime = (time) => {
+    if (isNaN(time)) return "0:00";
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
 
   return (
     <div className="bg-zinc-900 border border-zinc-800/80 rounded-4xl p-6 md:p-8 flex flex-col md:flex-row items-center gap-8 shadow-xl">
@@ -38,23 +63,21 @@ const Player = () => {
 
       {/* Right: Info and Controls (Stacked vertically) */}
       <div className="flex flex-col items-center justify-center flex-1 gap-8 w-full">
-        {/* Fake Text Bars (Equalizer/Track Info) */}
-        <div className="flex flex-col items-center gap-3 w-full max-w-50">
-          <div className="w-full h-4 bg-zinc-700 rounded-full"></div>
-          <div className="w-[80%] h-3 bg-zinc-800 rounded-full"></div>
-          <div className="w-[60%] h-2 bg-zinc-800/50 rounded-full"></div>
-        </div>
-
         {/* Playback Controls */}
         <div className="flex items-center gap-6">
-          <button className="w-12 h-12 rounded-full flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors">
+          <button
+            onClick={() => skipSong("backward")}
+            className="w-12 h-12 rounded-full flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+          >
             <SkipBack size={24} fill="currentColor" />
           </button>
 
           <audio
-            key={playersSong?.audioUrl} // Force reload when song changes
+            key={playersSong?.audioUrl}
             ref={audioRef}
             src={playersSong?.url}
+            onTimeUpdate={handleTimeUpdate} // Link the progress
+            onLoadedMetadata={handleLoadedMetadata} // Link the total length
             className="hidden"
           ></audio>
 
@@ -69,9 +92,28 @@ const Player = () => {
             )}
           </button>
 
-          <button className="w-12 h-12 rounded-full flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors">
+          <button
+            onClick={() => skipSong("forward")}
+            className="w-12 h-12 rounded-full flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+          >
             <SkipForward size={24} fill="currentColor" />
           </button>
+        </div>
+
+        {/* slider */}
+        <div className="w-full flex flex-col gap-2">
+          <input
+            type="range"
+            min="0"
+            max={duration || 0}
+            value={currentTime}
+            onChange={handleSliderChange}
+            className="w-full h-1.5 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+          />
+          <div className="flex justify-between text-xs text-zinc-500 font-medium">
+            <span>{formatTime(currentTime)}</span>
+            <span>{formatTime(duration)}</span>
+          </div>
         </div>
       </div>
     </div>
