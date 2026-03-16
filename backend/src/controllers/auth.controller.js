@@ -2,7 +2,6 @@ const userModel = require("../models/user.model");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
-
 // -------- Controller to handle user registration --------
 async function register(req, res) {
   const { email, username, password, type } = req.body;
@@ -30,6 +29,7 @@ async function register(req, res) {
     });
     res.cookie("token", token, {
       httpOnly: true,
+      
       secure: true,
     });
     res.status(201).json({
@@ -39,7 +39,7 @@ async function register(req, res) {
       type: newUser.type,
     });
   } catch (error) {
-    res.status(500).json({ 
+    res.status(500).json({
       message: "Server error",
       error: error.message,
     });
@@ -80,7 +80,10 @@ async function login(req, res) {
       type: user.type,
     });
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({
+      message: "Server error",
+      error,
+    });
   }
 }
 

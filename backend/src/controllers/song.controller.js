@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require("uuid");
 
 // -------- Controller to get all songs --------
 async function getSongs(req, res) {
-  const { mood } = req.body;
+  const { mood } = req.query;
   try {
     const songs = await songModel.find({ category: mood });
     res.json(songs);

@@ -27,7 +27,6 @@ export const AuthProvider = ({ children }) => {
   // Check if user is authenticated on app load
   useEffect(() => {
     checkAuthStatus();
-    fetchSong("sad");
   }, []);
 
   const checkAuthStatus = async () => {
@@ -138,8 +137,8 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await axios.get(
         "http://localhost:3000/api/songs/get",
-        mood,
         {
+          params: { mood },
           withCredentials: true, // Include cookies for authentication
         },
       );

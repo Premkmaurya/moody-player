@@ -1,18 +1,17 @@
 import React, { useRef, useEffect, useState } from "react";
 import * as faceapi from "face-api.js";
 
-import { Loader2, ScanFace } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
 
 const EmotionDetector = () => {
   const videoRef = useRef();
-  const { setMood } = useAuth();
+  const { setMood, fetchSong } = useAuth();
 
   const [isDetecting, setIsDetecting] = useState(false);
 
   useEffect(() => {
-    startVideo();
     loadModels();
   }, []);
 
@@ -29,27 +28,37 @@ const EmotionDetector = () => {
     await faceapi.nets.faceExpressionNet.loadFromUri("/models/face_expression");
   };
 
-  const detectEmotion = () => {
-    setIsDetecting(true);
-    setMood(null);
-    async () => {
+  const detectEmotion = async () => { // 1. Make the handler async
+    try {
+      startVideo();
+      setIsDetecting(true);
+      setMood(null);
+
+      // 2. Wrap in a small delay or ensure video is ready
+      // Face-api needs a moment for the video stream to initialize
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       const detections = await faceapi
         .detectAllFaces(videoRef.current, new faceapi.TinyFaceDetectorOptions())
         .withFaceExpressions();
 
-      if (detections.length > 0) {
+      if (detections && detections.length > 0) {
         const expressions = detections[0].expressions;
-        console.log("Detected Expressions:", expressions);
-
+        
+        // Find the expression with the highest confidence score
         const mood = Object.keys(expressions).reduce((a, b) =>
-          expressions[a] > expressions[b] ? a : b,
+          expressions[a] > expressions[b] ? a : b
         );
 
-        setIsDetecting(false);
         setMood(mood);
         console.log("User Mood:", mood);
+        fetchSong(mood);
       }
-    };
+    } catch (error) {
+      console.error("Detection failed:", error);
+    } finally {
+      setIsDetecting(false); // 3. Always turn off loading state
+    }
   };
 
   return (
