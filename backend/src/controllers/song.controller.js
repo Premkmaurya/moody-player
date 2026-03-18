@@ -5,8 +5,10 @@ const { v4: uuidv4 } = require("uuid");
 // -------- Controller to get all songs --------
 async function getSongs(req, res) {
   const { mood } = req.query;
+  console.log(mood);
   try {
     const songs = await songModel.find({ category: mood });
+    console.log(songs);
     res.json(songs);
   } catch (error) {
     res.status(500).json({ message: "Error fetching songs", error });
@@ -21,7 +23,7 @@ async function addSong(req, res) {
     });
   }
   try {
-    const { title, artist, album, lyrics, category } = req.body;
+    const { title, artist, lyrics, category } = req.body;
     const song = req.files.song[0];
     const coverImage = req.files.coverImage[0];
 
@@ -39,7 +41,6 @@ async function addSong(req, res) {
     const newSong = new songModel({
       title,
       artist,
-      album,
       url: uploadedSong.url,
       coverImage: uploadedImage.url,
       lyrics,

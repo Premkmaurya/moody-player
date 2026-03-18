@@ -8,7 +8,7 @@ import { useAuth } from "../context/AuthContext";
 const EmotionDetector = () => {
   const videoRef = useRef();
   const canvasRef = useRef(null);
-  const { setMood, fetchSong } = useAuth();
+  const { fetchSong } = useAuth();
 
   const [isDetecting, setIsDetecting] = useState(false);
 
@@ -17,7 +17,9 @@ const EmotionDetector = () => {
       await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
       await faceapi.nets.faceExpressionNet.loadFromUri("/models");
     };
+
     loadModels();
+    startVideo();
   }, []);
 
   const startVideo = async () => {
@@ -47,57 +49,48 @@ const EmotionDetector = () => {
     canvas.width = displaySize.width;
     canvas.height = displaySize.height;
 
-    startVideo();
-
     faceapi.matchDimensions(canvas, displaySize);
-
     // 🔴 HARD GUARD (most important)
-    if (
-      !video ||
-      video.readyState !== 4 ||
-      video.videoWidth === 0 ||
-      video.videoHeight === 0
-    )
-      return;
+      if (!video || video.readyState !== 4 || video.videoWidth === 0) return;
 
-    try {
-      const detections = await faceapi
-        .detectAllFaces(
-          video,
-          new faceapi.TinyFaceDetectorOptions({
-            inputSize: 224, // 🔥 reduce size = more stable
-            scoreThreshold: 0.5,
-          }),
-        )
-        .withFaceExpressions();
+      const moodCounts = {};
+      try {
+        for (let i = 0; i < 10; i++) {
+          const detections = await faceapi
+            .detectAllFaces(
+              video,
+              new faceapi.TinyFaceDetectorOptions({
+                inputSize: 160,
+                scoreThreshold: 0.5,
+              }),
+            )
+            .withFaceExpressions();
 
-      // 🔴 EXTRA SAFETY (skip broken detections)
-      if (!detections || !detections.length) return;
+          if (detections.length > 0) {
+            const expressions = detections[0].expressions;
 
-      if (!detections[0].detection || !detections[0].detection.box) return;
+            const mood = Object.keys(expressions).reduce((a, b) =>
+              expressions[a] > expressions[b] ? a : b,
+            );
 
-      if (detections && detections.length > 0) {
-        const expressions = detections[0].expressions;
+            moodCounts[mood] = (moodCounts[mood] || 0) + 1;
+          }
 
-        // Find the expression with the highest confidence score
-        const mood = Object.keys(expressions).reduce((a, b) =>
-          expressions[a] > expressions[b] ? a : b,
+          // small delay between frames
+          await new Promise((res) => setTimeout(res, 150));
+        }
+
+        // 🔥 find most frequent mood
+        const finalMood = Object.keys(moodCounts).reduce((a, b) =>
+          moodCounts[a] > moodCounts[b] ? a : b,
         );
 
-        console.log("Detected mood:", mood);
+        console.log("Final Mood:", finalMood);
+
+        await fetchSong(finalMood);
+      } catch {
+        console.log("skip frame");
       }
-
-      const resized = faceapi.resizeResults(detections, displaySize);
-
-      const ctx = canvas.getContext("2d");
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      faceapi.draw.drawDetections(canvas, resized);
-      faceapi.draw.drawFaceExpressions(canvas, resized);
-    } catch (err) {
-      // 🔴 THIS LINE SAVES YOUR APP
-      console.log("⚠️ skipped bad frame");
-    }
   };
 
   return (

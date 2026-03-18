@@ -143,6 +143,7 @@ export const AuthProvider = ({ children }) => {
         },
       );
       setSongs(response.data);
+      console.log(response.data)
     } catch (error) {
       return console.log(error);
     }

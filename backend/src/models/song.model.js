@@ -18,7 +18,7 @@ const SongSchema = new Schema(
       type: String,
       trim: true,
       required: true,
-      enum:["happy", "sad", "angry", "excited"],
+      enum:["happy", "sad", "angry", "excited","neutral"],
       default: "happy",
     },
     url: {
