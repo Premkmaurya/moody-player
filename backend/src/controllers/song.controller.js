@@ -5,10 +5,8 @@ const { v4: uuidv4 } = require("uuid");
 // -------- Controller to get all songs --------
 async function getSongs(req, res) {
   const { mood } = req.query;
-  console.log(mood);
   try {
     const songs = await songModel.find({ category: mood });
-    console.log(songs);
     res.json(songs);
   } catch (error) {
     res.status(500).json({ message: "Error fetching songs", error });

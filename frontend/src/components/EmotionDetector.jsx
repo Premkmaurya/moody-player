@@ -5,6 +5,8 @@ import { Loader2 } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
 
+import { toast } from "sonner";
+
 const EmotionDetector = () => {
   const videoRef = useRef();
   const canvasRef = useRef(null);
@@ -51,51 +53,42 @@ const EmotionDetector = () => {
 
     faceapi.matchDimensions(canvas, displaySize);
     // 🔴 HARD GUARD (most important)
-      if (!video || video.readyState !== 4 || video.videoWidth === 0) return;
+    if (!video || video.readyState !== 4 || video.videoWidth === 0) return;
 
-      const moodCounts = {};
+    const moodCounts = {};
+    setIsDetecting(true);
+    for (let i = 0; i < 10; i++) {
       try {
-        for (let i = 0; i < 10; i++) {
-          const detections = await faceapi
-            .detectAllFaces(
-              video,
-              new faceapi.TinyFaceDetectorOptions({
-                inputSize: 160,
-                scoreThreshold: 0.5,
-              }),
-            )
-            .withFaceExpressions();
+        const detections = await faceapi
+          .detectAllFaces(
+            video,
+            new faceapi.TinyFaceDetectorOptions({
+              inputSize: 160,
+              scoreThreshold: 0.5,
+            }),
+          )
+          .withFaceExpressions();
 
-          if (detections.length > 0) {
-            const expressions = detections[0].expressions;
+        if (detections.length > 0) {
+          const expressions = detections[0].expressions;
 
-            const mood = Object.keys(expressions).reduce((a, b) =>
-              expressions[a] > expressions[b] ? a : b,
-            );
+          const mood = Object.keys(expressions).reduce((a, b) =>
+            expressions[a] > expressions[b] ? a : b,
+          );
 
-            moodCounts[mood] = (moodCounts[mood] || 0) + 1;
-          }
-
-          // small delay between frames
-          await new Promise((res) => setTimeout(res, 150));
+          moodCounts[mood] = (moodCounts[mood] || 0) + 1;
         }
-
-        // 🔥 find most frequent mood
-        const finalMood = Object.keys(moodCounts).reduce((a, b) =>
-          moodCounts[a] > moodCounts[b] ? a : b,
-        );
-
-        console.log("Final Mood:", finalMood);
-
-        await fetchSong(finalMood);
       } catch {
-        console.log("skip frame");
+        console.log("skip bad frame"); // ❗ silent skip
       }
+
+      await new Promise((res) => setTimeout(res, 150));
+    }
   };
 
   return (
     <>
-      <div className="relative bg-zinc-900 border border-zinc-800/80 rounded-4xl min-h-[250px] flex flex-col items-center justify-center overflow-hidden shadow-xl">
+      <div className="relative bg-zinc-900 border border-zinc-800/80 rounded-4xl min-h-62.5 flex flex-col items-center justify-center overflow-hidden shadow-xl">
         <video
           ref={videoRef}
           className="w-full h-[50vh] object-cover"
