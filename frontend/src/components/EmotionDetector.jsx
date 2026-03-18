@@ -7,57 +7,96 @@ import { useAuth } from "../context/AuthContext";
 
 const EmotionDetector = () => {
   const videoRef = useRef();
+  const canvasRef = useRef(null);
   const { setMood, fetchSong } = useAuth();
 
   const [isDetecting, setIsDetecting] = useState(false);
 
   useEffect(() => {
+    const loadModels = async () => {
+      await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
+      await faceapi.nets.faceExpressionNet.loadFromUri("/models");
+    };
     loadModels();
   }, []);
 
-  const startVideo = () => {
-    navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
-      videoRef.current.srcObject = stream;
-    });
-  };
-
-  const loadModels = async () => {
-    await faceapi.nets.tinyFaceDetector.loadFromUri(
-      "/models/tiny_face_detector",
-    );
-    await faceapi.nets.faceExpressionNet.loadFromUri("/models/face_expression");
-  };
-
-  const detectEmotion = async () => { // 1. Make the handler async
+  const startVideo = async () => {
     try {
-      startVideo();
-      setIsDetecting(true);
-      setMood(null);
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+      });
+      videoRef.current.srcObject = stream;
 
-      // 2. Wrap in a small delay or ensure video is ready
-      // Face-api needs a moment for the video stream to initialize
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      videoRef.current.onplay = () => {
+        console.log("Video started");
+      };
+    } catch (err) {
+      console.error("Camera error:", err);
+    }
+  };
 
+  const startDetection = async () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+
+    const displaySize = {
+      width: video.videoWidth,
+      height: video.videoHeight,
+    };
+
+    canvas.width = displaySize.width;
+    canvas.height = displaySize.height;
+
+    startVideo();
+
+    faceapi.matchDimensions(canvas, displaySize);
+
+    // 🔴 HARD GUARD (most important)
+    if (
+      !video ||
+      video.readyState !== 4 ||
+      video.videoWidth === 0 ||
+      video.videoHeight === 0
+    )
+      return;
+
+    try {
       const detections = await faceapi
-        .detectAllFaces(videoRef.current, new faceapi.TinyFaceDetectorOptions())
+        .detectAllFaces(
+          video,
+          new faceapi.TinyFaceDetectorOptions({
+            inputSize: 224, // 🔥 reduce size = more stable
+            scoreThreshold: 0.5,
+          }),
+        )
         .withFaceExpressions();
+
+      // 🔴 EXTRA SAFETY (skip broken detections)
+      if (!detections || !detections.length) return;
+
+      if (!detections[0].detection || !detections[0].detection.box) return;
 
       if (detections && detections.length > 0) {
         const expressions = detections[0].expressions;
-        
+
         // Find the expression with the highest confidence score
         const mood = Object.keys(expressions).reduce((a, b) =>
-          expressions[a] > expressions[b] ? a : b
+          expressions[a] > expressions[b] ? a : b,
         );
 
-        setMood(mood);
-        console.log("User Mood:", mood);
-        fetchSong(mood);
+        console.log("Detected mood:", mood);
       }
-    } catch (error) {
-      console.error("Detection failed:", error);
-    } finally {
-      setIsDetecting(false); // 3. Always turn off loading state
+
+      const resized = faceapi.resizeResults(detections, displaySize);
+
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      faceapi.draw.drawDetections(canvas, resized);
+      faceapi.draw.drawFaceExpressions(canvas, resized);
+    } catch (err) {
+      // 🔴 THIS LINE SAVES YOUR APP
+      console.log("⚠️ skipped bad frame");
     }
   };
 
@@ -70,9 +109,17 @@ const EmotionDetector = () => {
           autoPlay
           muted
         />
+        <canvas
+          ref={canvasRef}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+          }}
+        />
         {/* Detect Button (Positioned bottom right just like the sketch) */}
         <button
-          onClick={detectEmotion}
+          onClick={startDetection}
           disabled={isDetecting}
           className={`absolute bottom-6 right-6 flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 z-20 ${
             isDetecting
